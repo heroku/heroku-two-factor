@@ -1,5 +1,14 @@
 module Heroku::Command
   class Otp < BaseWithApp
+    def index
+      status = heroku.otp_status
+      if status["enabled"]
+        display "OTP is enabled."
+      else
+        display "OTP is not enabled."
+      end
+    end
+
     def enable
       require "launchy"
       url = heroku.otp_status["url"]
@@ -20,15 +29,6 @@ module Heroku::Command
     def disable
       heroku.otp_disable
       display "Disabled OTP on account"
-    end
-
-    def status
-      status = heroku.otp_status
-      if status["enabled"]
-        display "OTP is enabled."
-      else
-        display "OTP is not enabled."
-      end
     end
   end
 end
