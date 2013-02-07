@@ -1,17 +1,17 @@
 module Heroku::Command
-  class Otp < BaseWithApp
+  class TwoFactor < BaseWithApp
     def index
-      status = heroku.otp_status
+      status = heroku.two_factor_status
       if status["enabled"]
-        display "OTP is enabled."
+        display "Two-factor auth is enabled."
       else
-        display "OTP is not enabled."
+        display "Two-factor is not enabled."
       end
     end
 
     def enable
       require "launchy"
-      url = heroku.otp_status["url"]
+      url = heroku.two_factor_status["url"]
 
       display "Opening OTP QRcode"
       base_path = File.dirname(__FILE__) + "/support"
@@ -22,28 +22,28 @@ module Heroku::Command
       print "Security code: "
       code = ask
 
-      heroku.otp_enable(code)
-      display "OTP enabled"
+      heroku.two_factor_enable(code)
+      display "Enabled two-factor authentication."
     end
 
     def disable
-      heroku.otp_disable
-      display "Disabled OTP on account"
+      heroku.two_factor_disable
+      display "Disabled two-factor authentication."
     end
   end
 end
 
 
 module Heroku::Otp
-  def otp_status
+  def two_factor_status
     json_decode get("/account/two-factor").to_s
   end
 
-  def otp_enable(code)
+  def two_factor_enable(code)
     json_decode put("/account/two-factor", :code => code).to_s
   end
 
-  def otp_disable
+  def two_factor_disable
     json_decode delete("/account/two-factor").to_s
   end
 end
