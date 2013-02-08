@@ -42,7 +42,7 @@ class Heroku::Client
   end
 
   def two_factor_enable(code)
-    json_decode put("/account/two-factor", :code => code).to_s
+    json_decode put("/account/two-factor", {}, {"Heroku-Two-Factor-Code" => code.to_s}).to_s
   end
 
   def two_factor_disable
