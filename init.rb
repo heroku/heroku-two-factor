@@ -11,12 +11,11 @@ module Heroku::Command
 
     def enable
       require "launchy"
-      url = heroku.two_factor_status["url"]
 
-      display "Opening OTP QRcode"
-      base_path = File.dirname(__FILE__) + "/support"
-      File.open("#{base_path}/code.js", "w") { |f| f.puts "var code = '#{url}';" }
-      Launchy.open("#{base_path}/qrcode.html")
+      display "Opening OTP QRcode..."
+      url = heroku.two_factor_status["url"]
+      File.open(js_code_file, "w") { |f| f.puts "var code = '#{url}';" }
+      Launchy.open("#{support_path}/qrcode.html")
 
       display "Please add this OTP to your favorite application and enter it below."
       display "Keep in mind that two-factor will cause your API key to change, and expire every 30 days!"
@@ -25,11 +24,23 @@ module Heroku::Command
 
       heroku.two_factor_enable(code)
       display "Enabled two-factor authentication."
+    ensure
+      File.delete(js_code_file) rescue Errno::ENOENT
     end
 
     def disable
       heroku.two_factor_disable
       display "Disabled two-factor authentication."
+    end
+
+    protected
+
+    def support_path
+      File.dirname(__FILE__) + "/support"
+    end
+
+    def js_code_file
+      "#{support_path}/code.js"
     end
   end
 end
