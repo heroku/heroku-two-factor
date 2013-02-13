@@ -24,13 +24,11 @@ module Heroku::Command
       code = ask
 
       heroku.two_factor_enable(code)
-      File.open(Heroku::Auth.two_factor_hint_file, "w") { |f| f.puts "enabled" }
       display "Enabled two-factor authentication."
     end
 
     def disable
       heroku.two_factor_disable
-      File.delete(Heroku::Auth.two_factor_hint_file) rescue Errno::ENOENT
       display "Disabled two-factor authentication."
     end
   end
@@ -54,12 +52,6 @@ class Heroku::Auth
   class << self
     alias :default_params_without_two_factor :default_params
 
-    # used by heroku login to establish whether to
-    # ask for the two-factor code or not
-    def two_factor_hint_file
-      "#{home_directory}/.heroku/two-factor"
-    end
-
     def default_params
       params = default_params_without_two_factor
       return params unless @code
@@ -76,10 +68,8 @@ class Heroku::Auth
       print "Password (typing will be hidden): "
       password = running_on_windows? ? ask_for_password_on_windows : ask_for_password
 
-      if File.exists?(Heroku::Auth.two_factor_hint_file)
-        print "Two-factor code (leave blank if none): "
-        @code = ask
-      end
+      print "Two-factor code (leave blank if none): "
+      @code = ask
 
       [user, api_key(user, password)]
     end
