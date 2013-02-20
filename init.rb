@@ -1,7 +1,9 @@
 # encoding: utf-8
 base = File.dirname(__FILE__)
-require "#{base}/vendor/rqrcode-0.4.2/lib/rqrcode"
-require "#{base}/vendor/term-ansicolor-1.0.7/lib/term/ansicolor"
+$: << "#{base}/vendor/rqrcode-0.4.2/lib/"
+$: << "#{base}/vendor/term-ansicolor-1.0.7/lib/"
+require "rqrcode"
+require "term/ansicolor"
 
 module Heroku::Command
   class TwoFactor < BaseWithApp
