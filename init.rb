@@ -1,3 +1,8 @@
+# encoding: utf-8
+base = File.dirname(__FILE__)
+require "#{base}/vendor/rqrcode-0.4.2/lib/rqrcode"
+require "#{base}/vendor/term-ansicolor-1.0.7/lib/term/ansicolor"
+
 module Heroku::Command
   class TwoFactor < BaseWithApp
     def index
@@ -12,13 +17,11 @@ module Heroku::Command
     def enable
       require "launchy"
 
-      display "Opening OTP QRcode..."
-      url = heroku.two_factor_status["url"]
-      File.open(js_code_file, "w") { |f| f.puts "var code = '#{url}';" }
-      Launchy.open("#{support_path}/qrcode.html")
+      display "WARN: this will change your API key, and expire it every 30 days!"
+      display "To enable, add the following OTP to your favorite application, and login below:"
 
-      display "WARN: this will your API key to change, and expire every 30 days!"
-      display "Please add this OTP to your favorite application and login below."
+      url = heroku.two_factor_status["url"]
+      display_qrcode(url)
 
       # ask for credentials again, this time storing the password in memory
       Heroku::Auth.credentials = Heroku::Auth.ask_for_credentials
@@ -35,8 +38,6 @@ module Heroku::Command
       Heroku::Auth.write_credentials
 
       display "Enabled two-factor authentication."
-    ensure
-      File.delete(js_code_file) rescue Errno::ENOENT
     end
 
     def disable
@@ -46,12 +47,26 @@ module Heroku::Command
 
     protected
 
-    def support_path
-      File.dirname(__FILE__) + "/support"
-    end
+    def display_qrcode(url)
+      qr = RQRCode::QRCode.new(url, :size => 4, :level => :l)
 
-    def js_code_file
-      "#{support_path}/code.js"
+      # qr.to_s doesn't work unfortunately. bringing that
+      # over, and using two characters per position instead
+      color = Term::ANSIColor
+      white = color.white { "██" }
+      black = color.black { "██" }
+      line  = white * (qr.module_count + 2)
+
+      code = qr.modules.map do |row|
+        contents = row.map do |col|
+          col ? black : white
+        end.join
+        white + contents + white
+      end.join("\n")
+
+      puts line
+      puts code
+      puts line
     end
   end
 end
