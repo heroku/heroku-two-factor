@@ -47,6 +47,17 @@ module Heroku::Command
       display "Disabled two-factor authentication."
     end
 
+    def generate_recovery_codes
+      print "Two-factor code: "
+      code = ask
+
+      recovery_codes = heroku.two_factor_recovery_codes(code)
+      display "Recovery codes:"
+      recovery_codes.each { |c| display c }
+    rescue RestClient::Unauthorized => e
+      error Heroku::Command.extract_error(e.http_body)
+    end
+
     protected
 
     def display_qrcode(url)
@@ -79,11 +90,17 @@ class Heroku::Client
   end
 
   def two_factor_enable(code)
-    json_decode put("/account/two-factor", {}, {"Heroku-Two-Factor-Code" => code.to_s}).to_s
+    json_decode put("/account/two-factor", {},
+      {"Heroku-Two-Factor-Code" => code.to_s}).to_s
   end
 
   def two_factor_disable
     json_decode delete("/account/two-factor").to_s
+  end
+
+  def two_factor_recovery_codes(code)
+    json_decode post("/account/two-factor/recovery-codes", {},
+      {"Heroku-Two-Factor-Code" => code.to_s}).to_s
   end
 end
 
