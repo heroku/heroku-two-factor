@@ -16,6 +16,10 @@ module Heroku::Command
       end
     end
 
+    # 2fa:enable
+    #
+    # Enable 2fa on your account
+    #
     def enable
       require "launchy"
 
@@ -42,11 +46,23 @@ module Heroku::Command
       display "Enabled two-factor authentication."
     end
 
+    alias_command "2fa:enable", "twofactor:enable"
+
+    # 2fa:enable
+    #
+    # Disable 2fa on your account
+    #
     def disable
       heroku.two_factor_disable
       display "Disabled two-factor authentication."
     end
 
+    alias_command "2fa:disable", "twofactor:disable"
+
+    # 2fa:generate-recovery-codes
+    #
+    # Generates (and replaces) recovery codes
+    #
     def generate_recovery_codes
       print "Two-factor code: "
       code = ask
@@ -57,6 +73,8 @@ module Heroku::Command
     rescue RestClient::Unauthorized => e
       error Heroku::Command.extract_error(e.http_body)
     end
+
+    alias_command "2fa:generate-recovery-codes", "twofactor:generate_recovery_codes"
 
     protected
 
