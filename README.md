@@ -37,6 +37,9 @@ Two-factor code (leave blank if none): ######
 Enabled two-factor authentication.
 ```
 
+If you're having trouble scanning the QR code you can have it opened
+in a browser instead: `heroku 2fa:enable --browser`.
+
 You'll scan the QR code displayed above into the authenticator app, and then use the code it generates to verify that you've got things set up correctly.
 
 ## Recovery codes

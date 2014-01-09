@@ -26,14 +26,19 @@ module Heroku::Command
     #
     # Enable 2fa on your account
     #
+    # --browser # display QR code in a browser for better compatiblity
+    #
     def enable
-      require "launchy"
-
       display "WARN: this will change your API key, and expire it every 30 days!"
       display "To enable, add the following OTP to your favorite application, and login below:"
 
       url = heroku.two_factor_status["url"]
-      display_qrcode(url)
+
+      if options[:browser]
+        open_qrcode_in_browser(url)
+      else
+        render_qrcode(url)
+      end
 
       # ask for credentials again, this time storing the password in memory
       Heroku::Auth.credentials = Heroku::Auth.ask_for_credentials
@@ -50,6 +55,11 @@ module Heroku::Command
       Heroku::Auth.write_credentials
 
       display "Enabled two-factor authentication."
+    ensure
+      # make sure to clean file containing js file (for browser)
+      if options[:browser]
+        File.delete(js_code_file) rescue Errno::ENOENT
+      end
     end
 
     alias_command "2fa:enable", "twofactor:enable"
@@ -84,7 +94,13 @@ module Heroku::Command
 
     protected
 
-    def display_qrcode(url)
+    def open_qrcode_in_browser(url)
+      require "launchy"
+      File.open(js_code_file, "w") { |f| f.puts "var code = '#{url}';" }
+      Launchy.open("#{support_path}/qrcode.html")
+    end
+
+    def render_qrcode(url)
       qr = RQRCode::QRCode.new(url, :size => 4, :level => :l)
 
       # qr.to_s doesn't work unfortunately. bringing that
@@ -104,6 +120,16 @@ module Heroku::Command
       puts line
       puts code
       puts line
+      puts "If you can't scan this qrcode please use 2fa:enable --browser"
+      puts
+    end
+
+    def support_path
+      File.dirname(__FILE__) + "/support"
+    end
+
+    def js_code_file
+      "#{support_path}/code.js"
     end
   end
 end
