@@ -7,6 +7,10 @@ require "term/ansicolor"
 
 module Heroku::Command
   class TwoFactor < BaseWithApp
+    # 2fa
+    #
+    # Display whether two-factor is enabled or not
+    #
     def index
       status = heroku.two_factor_status
       if status["enabled"]
@@ -15,6 +19,8 @@ module Heroku::Command
         display "Two-factor is not enabled."
       end
     end
+
+    alias_command "2fa", "twofactor"
 
     # 2fa:enable
     #
