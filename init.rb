@@ -30,7 +30,6 @@ module Heroku::Command
     #
     def enable
       display "WARN: this will change your API key, and expire it every 30 days!"
-      display "To enable, add the following OTP to your favorite application, and login below:"
 
       url = heroku.two_factor_status["url"]
 
@@ -99,11 +98,13 @@ module Heroku::Command
 
     def open_qrcode_in_browser(url)
       require "launchy"
+      display "To enable scan the QR code opened in your browser and login below."
       File.open(js_code_file, "w") { |f| f.puts "var code = '#{url}';" }
       Launchy.open("#{support_path}/qrcode.html")
     end
 
     def render_qrcode(url)
+      display "To enable scan the QR rendered below then login again."
       qr = RQRCode::QRCode.new(url, :size => 4, :level => :l)
 
       # qr.to_s doesn't work unfortunately. bringing that
