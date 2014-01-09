@@ -84,8 +84,7 @@ module Heroku::Command
     # Generates (and replaces) recovery codes
     #
     def generate_recovery_codes
-      print "Two-factor code: "
-      code = ask
+      code = Heroku::Auth.ask_for_second_factor
 
       recovery_codes = heroku.two_factor_recovery_codes(code)
       display "Recovery codes:"
