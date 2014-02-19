@@ -66,7 +66,7 @@ module Heroku::Command
 
     alias_command "2fa:enable", "twofactor:enable"
 
-    # 2fa:enable
+    # 2fa:disable
     #
     # Disable 2fa on your account
     #
