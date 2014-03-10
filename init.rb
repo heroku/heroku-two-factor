@@ -12,8 +12,7 @@ module Heroku::Command
     # Display whether two-factor is enabled or not
     #
     def index
-      status = heroku.two_factor_status
-      if status["enabled"]
+      if heroku.two_factor_enabled?
         display "Two-factor auth is enabled."
       else
         display "Two-factor is not enabled."
@@ -31,7 +30,7 @@ module Heroku::Command
     def enable
       display "WARN: this will change your API key, and expire it every 30 days!"
 
-      url = heroku.two_factor_status["url"]
+      url = heroku.two_factor_url
 
       if options[:browser]
         open_qrcode_in_browser(url)
@@ -139,8 +138,14 @@ module Heroku::Command
 end
 
 class Heroku::Client
-  def two_factor_status
-    json_decode get("/account/two-factor").to_s
+  def two_factor_enabled?
+    status = json_decode get("/account/two-factor").to_s
+    status["enabled"]
+  end
+
+  def two_factor_url
+    res = json_decode post("/account/two-factor/url").to_s
+    res["url"]
   end
 
   def two_factor_enable(code)
