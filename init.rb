@@ -55,6 +55,7 @@ module Heroku::Command
       Heroku::Auth.write_credentials
 
       display "Enabled two-factor authentication."
+      display "Please generate recovery codes with `heroku 2fa:generate-recovery-codes`."
     ensure
       # make sure to clean file containing js file (for browser)
       if options[:browser]
