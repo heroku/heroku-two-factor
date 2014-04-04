@@ -193,6 +193,7 @@ class Heroku::Auth
     end
 
     def ask_for_second_factor
+      check_accounts!
       print "Two-factor code: "
       @code = ask
       @code = nil if @code == ""
@@ -209,6 +210,14 @@ class Heroku::Auth
         enable_two_factor
         ask_for_second_factor
         retry
+      end
+    end
+
+    # 2FA is not compatible with heroku-accounts
+    def check_accounts!
+      accounts = 
+      if File.exists?("#{Heroku::Helpers.home_directory}/.heroku/plugins/heroku-accounts")
+        error %{Two-factor is not compatible with the "heroku-accounts" plugin. Please remove it and try again.}
       end
     end
 
