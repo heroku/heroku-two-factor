@@ -206,7 +206,7 @@ class Heroku::Auth
       id = json_decode(e.response.body)["id"]
       raise if id != "invalid_two_factor_code"
       delete_credentials
-      display "Authentication failed due to an invalid two-factor code. Please check your code was typed correctly and that your authenticator's time is accurate."
+      display "Authentication failed due to an invalid two-factor code. Please check your code was typed correctly and that your authenticator's time keeping is accurate."
       exit 1
     rescue Heroku::API::Errors::Forbidden => e
       two_factor_error = e.response.headers.has_key?("Heroku-Two-Factor-Required")
