@@ -52,9 +52,6 @@ module Heroku::Command
       Heroku::Auth.credentials = [Heroku::Auth.user, new_api_key]
       Heroku::Auth.write_credentials
 
-      # store a hint so toolbelt will keep asking for second factor on login
-      Heroku::Auth.enable_two_factor
-
       display "Enabled two-factor authentication."
     ensure
       # make sure to clean file containing js file (for browser)
@@ -71,7 +68,6 @@ module Heroku::Command
     #
     def disable
       heroku.two_factor_disable
-      Heroku::Auth.disable_two_factor
       display "Disabled two-factor authentication."
     end
 
@@ -185,7 +181,7 @@ class Heroku::Auth
       print "Password (typing will be hidden): "
       @current_session_password = running_on_windows? ? ask_for_password_on_windows : ask_for_password
 
-      if force_2fa || two_factor_enabled?
+      if force_2fa
         ask_for_second_factor
       end
 
@@ -205,8 +201,7 @@ class Heroku::Auth
       api.post_login(user, password).body["api_key"]
     rescue Heroku::API::Errors::Forbidden => e
       two_factor_error = e.response.headers.has_key?("Heroku-Two-Factor-Required")
-      if two_factor_error && !two_factor_enabled?
-        enable_two_factor
+      if two_factor_error
         ask_for_second_factor
         retry
       end
@@ -218,24 +213,6 @@ class Heroku::Auth
 
     def two_factor_code
       @code
-    end
-
-    def two_factor_enabled?
-      File.exists?(two_factor_file)
-    end
-
-    def enable_two_factor
-      File.write(two_factor_file, "")
-    end
-
-    def disable_two_factor
-      File.delete(two_factor_file)
-    rescue Errno::ENOENT
-    end
-
-    # simple file indicating 2fa is enabled
-    def two_factor_file
-      File.expand_path("#{Heroku::Helpers.home_directory}/.heroku/two_factor")
     end
 
     # do not touch ssh keys!
