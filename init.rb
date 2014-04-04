@@ -38,6 +38,8 @@ module Heroku::Command
         render_qrcode(url)
       end
 
+      display "Re-authenticate with code to activate two-factor."
+
       # ask for credentials again, this time storing the password in memory
       Heroku::Auth.credentials = Heroku::Auth.ask_for_credentials(true)
 
@@ -119,7 +121,7 @@ module Heroku::Command
       puts line
       puts code
       puts line
-      puts "If you can't scan this qrcode please use 2fa:enable --browser"
+      puts "If you can't scan this qrcode please use 2fa:enable --browser."
       puts
     end
 
