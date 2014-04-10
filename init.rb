@@ -70,7 +70,9 @@ module Heroku::Command
     # Disable 2fa on your account
     #
     def disable
-      heroku.two_factor_disable
+      print "Password (typing will be hidden): "
+      password = Heroku::Auth.ask_for_password
+      heroku.two_factor_disable(password)
       display "Disabled two-factor authentication."
     end
 
@@ -153,8 +155,9 @@ class Heroku::Client
       {"Heroku-Two-Factor-Code" => code.to_s}).to_s
   end
 
-  def two_factor_disable
-    json_decode delete("/account/two-factor").to_s
+  def two_factor_disable(password)
+    json_decode delete("/account/two-factor",
+      {"Heroku-Password" => password.to_s}).to_s
   end
 
   def two_factor_recovery_codes(password)
