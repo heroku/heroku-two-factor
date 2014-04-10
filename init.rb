@@ -81,9 +81,10 @@ module Heroku::Command
     # Generates (and replaces) recovery codes
     #
     def generate_recovery_codes
-      code = Heroku::Auth.ask_for_second_factor
+      print "Password (typing will be hidden): "
+      password = Heroku::Auth.ask_for_password
 
-      recovery_codes = heroku.two_factor_recovery_codes(code)
+      recovery_codes = heroku.two_factor_recovery_codes(password)
       display "Recovery codes:"
       recovery_codes.each { |c| display c }
     rescue RestClient::Unauthorized => e
@@ -156,9 +157,9 @@ class Heroku::Client
     json_decode delete("/account/two-factor").to_s
   end
 
-  def two_factor_recovery_codes(code)
+  def two_factor_recovery_codes(password)
     json_decode post("/account/two-factor/recovery-codes", {},
-      {"Heroku-Two-Factor-Code" => code.to_s}).to_s
+      {"Heroku-Password" => password.to_s}).to_s
   end
 end
 
